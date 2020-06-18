@@ -16,7 +16,7 @@ $( document ).ready(function() {
     console.log(data);
   });
 
-  socket.on('disconnect', () => { /*anything you want to do on disconnect*/ });
+  socket.on('disconnect', () => { console.log('user disconnected') });
 
   socket.on('user', function(data){
     $('#num-users').text(data.currentUsers+' users online');
