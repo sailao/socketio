@@ -43,9 +43,20 @@ mongo.connect(process.env.DATABASE, (err, db) => {
 
   
     //start socket.io code  
-
+    var currentUsers = 0;  
     io.on('connection', socket => {
-      console.log('A user has connected');
+        ++currentUsers;
+        console.log('user ' + socket.request.user.name + ' connected');
+        io.emit('user', {name: socket.request.user.name, currentUsers, connected: true});
+        
+        socket.on('chat message', (message) => {
+            io.emit('chat message', {name: socket.request.user.name, message});
+        });
+
+        socket.on('disconnect', () => {
+            --currentUsers;
+            io.emit('user', {name: socket.request.user.name, currentUsers, connected: true});
+        });
     });
 
     io.use(passportSocketIo.authorize({
