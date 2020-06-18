@@ -12,6 +12,9 @@ const cookieParser= require('cookie-parser')
 const app         = express();
 const http        = require('http').Server(app);
 const sessionStore= new session.MemoryStore();
+if (process.env.NODE_ENV !== 'production') require('dotenv').config()
+const io = require('socket.io')(http);
+const passportSocketIo = require('passport.socketio');
 
 
 fccTesting(app); //For FCC testing purposes
@@ -30,7 +33,6 @@ app.use(session({
   store: sessionStore,
 }));
 
-
 mongo.connect(process.env.DATABASE, (err, db) => {
     if(err) console.log('Database error: ' + err);
   
@@ -42,7 +44,16 @@ mongo.connect(process.env.DATABASE, (err, db) => {
   
     //start socket.io code  
 
-  
+    io.on('connection', socket => {
+      console.log('A user has connected');
+    });
+
+    io.use(passportSocketIo.authorize({
+      cookieParser: cookieParser,
+      key:          'express.sid',
+      secret:       process.env.SESSION_SECRET,
+      store:        sessionStore
+    }));
 
     //end socket.io code
   
